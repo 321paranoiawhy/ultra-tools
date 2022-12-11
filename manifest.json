@@ -81,7 +81,8 @@
 			// "port": 8888,
 			"proxy": {
 				"/api": {
-					"target": "http://multi_record.heicycyu.top:8888",
+					// "target": "http://rp.heicycyu.top:8888",
+					"target": "http://rp.heicycyu.top:8887", // 本地开发
 					"changeOrigin": true,
 					"secure": false,
 					"pathRewrite": { //匹配请求路径里面有 /api 会替换成https://www.test.com

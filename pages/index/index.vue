@@ -1,112 +1,166 @@
 <template>
 	<view class="root">
-		<!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-			<path fill="#3370ff" fill-opacity="1"
-				d="M0,128L48,112C96,96,192,64,288,74.7C384,85,480,139,576,133.3C672,128,768,64,864,69.3C960,75,1056,149,1152,176C1248,203,1344,181,1392,170.7L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z">
-			</path>
-		</svg> -->
+
 		<view class="welcome">
 			欢迎使用 ultra-tools
 		</view>
-		<!-- <image class="logo" src="/static/logo.png"></image> -->
 
-		<u-input placeholder="请输入你的手机号" v-model="phoneNumber" type="number" border="surround" clearable @blur="test">
-		</u-input>
-
-		<u-input placeholder="请输入验证码" v-model="verificationCode" type="number" border="surround" clearable
-			@blur="checkVerificationCode">
-			<template slot="suffix">
-				<u-code ref="uCode" @change="codeChange" seconds="60" changeText="X秒重新获取"></u-code>
-				<u-button @tap="getCode" :text="tips" type="success" size="mini"></u-button>
+		<u-input placeholder="请输入用户名" v-model="username" @focus="showUsenameTip = true;" @blur="onUsernameBlur"
+			border="surround" clearable>
+			<template slot="suffix" v-if="validUsername">
+				<u-icon name="checkbox-mark" color="#3370ff"></u-icon>
 			</template>
 		</u-input>
+		<view v-show="showUsenameTip">
+			<view class="list">
+				支持数字、大写字母、小写字母和下划线
+			</view>
+			<view class="list">
+				长度为 4 ~ 16 位
+			</view>
+			<view class="list" style="color: #f93e3e;">
+				用户名一经注册, 不可修改
+			</view>
+		</view>
 
-		<button :class="{actived:!!phoneNumber.length}" @click="gotoRegister" class="custom-button">下一步</button>
+		<!-- <u-icon name="info-circle"></u-icon> -->
+		<u-input placeholder="请输入密码" v-model="password" @focus="showPasswordTip = true;" @blur="onPasswordBlur"
+			type="password" border="surround" clearable>
+			<template slot="suffix" v-if="validPassword">
+				<u-icon name="checkbox-mark" color="#3370ff"></u-icon>
+			</template>
+		</u-input>
+		<view class="list" v-show="showPasswordTip">
+			长度为 6 ~ 32 位
+		</view>
+
+		<u-input placeholder="请重复密码" v-model="repeat_password" @focus="showRepeatPasswordTip = true;"
+			@blur="onRepeatPasswordBlur" type="password" border="surround" clearable>
+			<template slot="suffix" v-if="validRepeatPassword">
+				<u-icon name="checkbox-mark" color="#3370ff"></u-icon>
+			</template>
+		</u-input>
+		<view class="list" v-show="showRepeatPasswordTip">
+			请重复已输入密码
+		</view>
+
+		<button :class="{actived: canRegister}" @click="gotoRegister" class="custom-button">注册</button>
 
 		<view class="agree">
-			<mycheckbox @change="agree"></mycheckbox>
+			<mycheckbox @change="agreeChange"></mycheckbox>
 			<view>
 				我已阅读并同意<a href="#/pages/register">服务协议</a>和<a href="#/pages/register">隐私政策</a>
 			</view>
 		</view>
 		<view style="margin-top: 16rpx;">
-			已有账号？<a href="#/pages/memorial-day/index">立即登录<sup></sup></a>
+			已有账号？<a href="#/pages/login/login">立即登录<sup></sup></a>
 		</view>
 		<view class="flex-1"></view>
-		<u-divider text="更多方式" textColor="#8f959e" lineColor="#8f959e" :hairline="true"></u-divider>
-
-		<u-button icon="qq-fill" text="QQ 登录" class="switchLogin" iconColor="#2EA121"></u-button>
-		<u-button icon="weixin-fill" text="微信登录" class="switchLogin" iconColor="#2EA121"></u-button>
-		<u-button icon="email" text="邮箱登录" class="switchLogin" iconColor="#2EA121"></u-button>
-
 	</view>
 </template>
 
 <script>
 	import mycheckbox from "../../components/checkbox.vue";
+
 	import {
-		checkPhoneNumber
+		checkUsername,
+		checkPassword,
+		checkRepeatPassword,
 	} from "../../utils/check.js";
+
+	import {
+		regisiter,
+	} from "../../api/request.js";
+
 	export default {
 		components: {
 			mycheckbox,
 		},
 		data() {
 			return {
-				phoneNumber: "",
-				tips: "",
-				verificationCode: "",
+				username: "", // 用户名
+				showUsenameTip: false,
+				password: "", // 密码
+				showPasswordTip: false,
+				repeat_password: "", // 重复密码
+				showRepeatPasswordTip: false,
+				isAgreed: false,
 			}
+		},
+		computed: {
+			canRegister: function() {
+				if (checkUsername(this.username) && checkPassword(this.password) && checkRepeatPassword(this.password,
+						this.repeat_password) && this.isAgreed) {
+					return true;
+				} else {
+					return false;
+				}
+			},
+			validUsername: function() {
+				return checkUsername(this.username);
+			},
+			validPassword: function() {
+				return checkPassword(this.password);
+			},
+			validRepeatPassword: function() {
+				return checkRepeatPassword(this.password, this.repeat_password);
+			},
 		},
 		onLoad() {
 
 		},
 		methods: {
+			onUsernameBlur() {
+				if (!checkUsername(this.username)) {
+					uni.$u.toast('请输入合法的用户名');
+				}
+				this.showUsenameTip = false;
+			},
+			onPasswordBlur() {
+				if (!checkPassword(this.password)) {
+					uni.$u.toast('请输入合法的密码');
+				}
+				this.showPasswordTip = false;
+			},
+			onRepeatPasswordBlur() {
+				if (!checkRepeatPassword(this.password, this.repeat_password)) {
+					uni.$u.toast('请输入相同的密码');
+				}
+				this.showRepeatPasswordTip = false;
+			},
 			gotoRegister() {
-				uni.navigateTo({
-					url: "/pages/register",
-				})
-				console.log("hhh");
-			},
-			agree(e) {
-				console.log(e);
-			},
-			test(phoneNumber) {
-				if (!checkPhoneNumber(phoneNumber)) {
-					uni.$u.toast('请输入合法的手机号码');
+				if (this.isAgreed) {
+					regisiter({
+						username: this.username, // 用户名
+						password: this.password, // 密码
+						repeat_password: this.repeat_password, // 重复密码
+					}).then(() => {
+						uni.$u.toast('注册成功');
+
+						uni.navigateTo({
+							url: `/pages/login/login?username=${this.username}&password=${this.password}`,
+						});
+					});
 				}
+
+				// if (checkUsername(this.username) && checkPassword(this.password, this.repeat_password) && this
+				// 	.agreeStatus) {
+				// 	// this.checkInput = true;
+				// 	regisiter({
+				// 		username: this.username, // 用户名
+				// 		password: this.password, // 密码
+				// 		repeat_password: this.repeat_password, // 重复密码
+				// 	}).then(() => {
+				// 		uni.$u.toast('注册成功');
+				// 	});
+				// }
+
+				// useInfo({
+				// 	"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ3aHkxMjMiLCJleHAiOjE2NzE1NDM5MjN9.uZ8FTDWrfrFoh1NIkCtk6qzjl23mhTdLmOwgPhkckP4"
+				// });
 			},
-			// checkPhoneNumber(phoneNumber) {
-			// 	console.log(phoneNumber);
-			// 	const reg = /1\d{10}/;
-			// 	if (!reg.test(phoneNumber)) {
-			// 		uni.$u.toast('请输入合法的手机号码');
-			// 	}
-			// },
-			codeChange(text) {
-				this.tips = text;
-			},
-			getCode() {
-				if (this.$refs.uCode.canGetCode) {
-					// 模拟向后端请求验证码
-					uni.showLoading({
-						title: '正在获取验证码'
-					})
-					setTimeout(() => {
-						uni.hideLoading();
-						// 这里此提示会被this.start()方法中的提示覆盖
-						uni.$u.toast('验证码已发送');
-						// 通知验证码组件内部开始倒计时
-						this.$refs.uCode.start();
-					}, 1000);
-				} else {
-					uni.$u.toast('倒计时结束后再发送');
-				}
-			},
-			checkVerificationCode(code) {
-				if (code !== "123456") {
-					uni.$u.toast('请输入正确的验证码');
-				}
+			agreeChange(boolean) {
+				this.isAgreed = boolean;
 			},
 		}
 	}
@@ -202,5 +256,22 @@
 		margin-left: auto;
 		margin-right: auto;
 		margin-bottom: 50rpx;
+	}
+
+	.list {
+		position: relative;
+		margin-left: 12.5px;
+	}
+
+	.list::before {
+		position: absolute;
+		content: " ";
+		left: -10px;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: 10rpx;
+		height: 10rpx;
+		border-radius: 50%;
+		background-color: #3370ff;
 	}
 </style>

@@ -56,9 +56,9 @@
 	// import AnimatedInput from "../../components/AnimatedInput.vue";
 
 	import {
-		searchAnniversary,
-		createAnniversary,
-		updateAnniversary,
+		// searchAnniversary,
+		// createAnniversary,
+		// updateAnniversary,
 	} from "../../api/request.js";
 	export default {
 		// components: {
@@ -124,16 +124,15 @@
 				this.addText = top > 20 ? "" : "添加纪念日";
 			};
 
-
-			searchAnniversary({
-				id: 0,
-				page: 0,
-				page_size: 10,
-				orcer_by: "-title",
-			}).then((response) => response.json()).then(res => {
-				console.log("res", res);
-				console.log("data", res.data);
-			});
+			// searchAnniversary({
+			// 	id: 0,
+			// 	page: 0,
+			// 	page_size: 10,
+			// 	orcer_by: "-title",
+			// }).then((response) => response.json()).then(res => {
+			// 	console.log("res", res);
+			// 	console.log("data", res.data);
+			// });
 
 			// createAnniversary({
 			// 	id: 0,
